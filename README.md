@@ -2,8 +2,8 @@
 
 ماسح ضوئي للمستندات: صوّر أي ورقة فيقصّها التطبيق من الحواف، يصحّح الميلان، ويقترح فلتر يوضّح الصورة (ألوان محسّنة، رمادي، أبيض وأسود، توفير الحبر). عدة صفحات في ملف PDF واحد، حفظ ومشاركة، ويعمل بدون إنترنت.
 
-**أندرويد (APK):** https://github.com/hawwil/nexa-scan/releases/latest/download/NEXA-Scan.apk
+**أندرويد (APK):** https://nexa-ps.com/scan
 
-**آيفون:** افتح https://hawwil.github.io/nexa-scan/ في Safari ثم «مشاركة» ← «إضافة إلى الشاشة الرئيسية».
+**آيفون:** افتح https://scan.nexa-ps.com في Safari ثم «مشاركة» ← «إضافة إلى الشاشة الرئيسية».
 
 تم التطوير من NEXA للخدمات الرقمية — instagram.com/nexa.ryx
