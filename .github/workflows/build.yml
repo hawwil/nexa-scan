@@ -1,4 +1,4 @@
-name: Build APK & Web
+name: Build APK & AAB
 
 on:
   push:
@@ -7,11 +7,9 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
-  apk:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,38 +24,36 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
+          gradle-version: '8.11.1'
+
+      - name: Compile check (debug)
+        working-directory: src
+        run: gradle assembleDebug --no-daemon
+
+      - name: Decrypt upload key
+        env:
+          UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$UPLOAD_KEY_PASSWORD" ]; then echo "::error::Add the UPLOAD_KEY_PASSWORD secret (Settings > Secrets and variables > Actions)"; exit 1; fi
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in src/upload.jks.enc -out src/upload.jks -pass env:UPLOAD_KEY_PASSWORD
 
       - name: Build
         working-directory: src
-        run: gradle assembleRelease --no-daemon
+        env:
+          UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: gradle assembleRelease bundleRelease --no-daemon
 
       - name: Rename
-        run: cp src/app/build/outputs/apk/release/app-release.apk NEXA-Scan.apk
+        run: |
+          cp src/app/build/outputs/apk/release/app-release.apk NEXA-Scan.apk
+          cp src/app/build/outputs/bundle/release/app-release.aab NEXA-Scan.aab
+          rm -f src/upload.jks
 
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: NEXA Scan ${{ github.run_number }}
-          files: NEXA-Scan.apk
+          files: |
+            NEXA-Scan.apk
+            NEXA-Scan.aab
           make_latest: true
-
-  web:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Unpack source
-        run: unzip -o source.zip -d src
-
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: src/app/src/main/assets
-
-      - id: deploy
-        uses: actions/deploy-pages@v4
